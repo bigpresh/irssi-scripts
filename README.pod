@@ -1,0 +1,4 @@
+=head1 bigpresh's Irssi scripts
+
+Not a lot here yet; I'll release some of the scripts I use as and when I tidy
+them up to be decent enough to be willing to release.

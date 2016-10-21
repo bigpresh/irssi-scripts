@@ -1,0 +1,45 @@
+=head1 nickserv_check_cleanlist
+
+A quick and dirty irssi script to watch for NickServ REGISTER mesages in an
+Atheme services "snoop" channel, and checks the email address against
+http://cleanli.st/ to see if it used a throw-away email address, and report hits
+to another channel.
+
+Obviously this would, in the longer term, be better implemented within Atheme
+so it could reject the registration, but we're trialling this to see how usable
+the data is, so at the moment it just reports it for later action at human
+discretion.
+
+=head2 Configuration
+
+Load it as you would any other Irssi script, then set:
+
+=over
+
+=item * cleanlist_api_key
+
+Provide your L<http://cleanli.st/> API key to be used
+
+=item * nickserv_check_cleanlist_channels
+
+A comma-separated list of channels on which we should watch for NickServ
+REGISTER messages. If you want to listen on one channel for the messages and
+relay the results to a different channel, then separate them with a colon.
+
+For example:
+
+  #watch_channel:#report_channel,#other_channel
+
+... would watch #watch_channel, reporting results to #report_channel, and also
+watch #other_channel, reporting hits to the same channel in the latter case.
+
+The destination could also be the nick of someone to message.
+
+=item * cleanlist_check_domain_only
+
+If set to a true value, only the domain part of each email address to be checked
+will be sent to cleanli.st, rather than the whole thing, for user privacy (we'll
+change the email to test@domain before sending it).
+
+
+
