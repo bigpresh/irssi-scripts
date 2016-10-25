@@ -97,6 +97,37 @@ sub event_privmsg {
                 Irssi::print("Cleanlist reported no problems for $email");
             }
         }
+
+        my $bdea_api_key = Irssi::settings_get_str('bdea_api_key');
+        if ($bdea_api_key) {
+            Irssi::print(
+                "Looking up $domain against BDEA with key "
+                . $bdea_api_key
+            );
+            my $response = $ua->get(
+                "http://check.block-disposable-email.com/easyapi/json/"
+                . "$bdea_api_key/$domain"
+            );  
+            if (!$response->is_success) {
+                warn "Failed to look up $domain against BDEA - " 
+                    . $response->status_line;
+                return;
+            }
+            my $data = JSON::decode_json($response->content);
+            if ($data->{request_status} ne 'success') {
+                if ($data->{domain_status} ne 'ok') {
+                    $server->command(
+                        "MSG $report_channel $account email $email may be dodgy"
+                        . " - BDEA report status $data->{domain_status}"
+                    );
+                } else {
+                    Irssi::print("BDEA result ok for $domain");
+                }
+
+            } else {
+                Irssi::print("BDEA lookup status " . $data->{request_status});
+            }
+        }
     }
 }
 Irssi::signal_add("event privmsg", "event_privmsg");
