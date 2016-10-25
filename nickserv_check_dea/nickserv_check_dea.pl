@@ -5,28 +5,44 @@ use vars qw($VERSION %IRSSI);
 use LWP::UserAgent;
 use JSON;
 
-$VERSION = "0.01";
+$VERSION = "0.02";
 %IRSSI = (
     authors     => 'David Precious',
-    name        => 'nickserv_check_cleanlist',
+    name        => 'nickserv_check_dea',
     description => 'Watch NickServ REGISTER messages, check for disposable email',
     license     => 'Public Domain',
     changed	=> '2016-10-21',
 );
 
-
+# API key to access cleanli.st with; if empty, we won't check them
 Irssi::settings_add_str(
-    'nickserv_check_cleanlist', 'cleanlist_api_key', ''
+    'nickserv_check_dea', 'cleanlist_api_key', ''
 );
+# API key to access BDEA (block-disposable-email.com) with; if empty,
+# we won't check them
 Irssi::settings_add_str(
-    'nickserv_check_cleanlist', 'nickserv_check_cleanlist_channels', ''
+    'nickserv_check_dea', 'bdea_api_key', ''
 );
+# Channels in which we should look for NickServ REGISTER messages (where
+# Atheme services are configured to log them to); comma-separated, and each 
+# can optionally have a reporting destination channel after a colon if our
+# reports should go to a different channel, e.g.:
+# #snoop,#chan1:#chan1-reports
+# ... would watch #snoop, and report results for those lookups to the same
+# channel, and watch #chan1, reporting those results to #chan1-reports.
+Irssi::settings_add_str(
+    'nickserv_check_dea', 'nickserv_check_dea_channels', ''
+);
+# For cleanli.st, you can supply a whole email address to also check if the
+# local-part looks suspicious - but you might not want to send your user's full
+# email address to a third party, setting this to a true value will change the
+# local-part to testing@ before sending.
 Irssi::settings_add_bool(
-    'nickserv_check_cleanlist', 'cleanlist_check_domain_only', 1
+    'nickserv_check_dea', 'cleanlist_check_domain_only', 1
 );
 
 my $ua = LWP::UserAgent->new(
-    agent => "irssi/nick-serv-check-dea $VERSION",
+    agent => "irssi/nickserv_check_dea $VERSION",
 );
 
 
@@ -35,7 +51,7 @@ sub event_privmsg {
     my ($target, $text) = split / :/, $data, 2;
     
     my $channel_list = Irssi::settings_get_str(
-        'nickserv_check_cleanlist_channels'
+        'nickserv_check_dea_channels'
     );
     return unless $channel_list;
     my %channel_map;
@@ -48,36 +64,38 @@ sub event_privmsg {
 
     if (my($account, $email) = $text =~ /REGISTER: (\w+) to (\S+)/) {
         my $domain = (split /\@/, $email)[1];
-        my $api_key = Irssi::settings_get_str('cleanlist_api_key');
-        if (!$api_key) {
-            Irssi::print("Set cleanlist API key with /set cleanlist_api_key");
-            return;
-        }
+        my $cleanlist_api_key = Irssi::settings_get_str('cleanlist_api_key');
+        if ($cleanlist_api_key) {
 
-        # By default, for user privacy, we send only the domain, replacing the
-        # local-part
-        my $pattern = Irssi::settings_get_bool('cleanlist_check_domain_only')
-            ? "test\@$domain" : $email;
-        
-        Irssi::print("Looking up $pattern against cleanlist with key $api_key");
-        my $response = $ua->get(
-            "http://app.cleanli.st/api/$api_key/pattern/check/$pattern"
-        );  
-        if (!$response->is_success) {
-            warn "Failed to look up test\@$email against cleanli.st - " 
-                . $response->status_line;
-            return;
-        }
-        # Good response - code 1000, description valid, class 1
-        my $data = JSON::decode_json($response->content);
-        if ($data->{code} != 1000) {
-            $server->command(
-                "MSG $report_channel $account email $email may be dodgy - "
-                . "code $data->{code} - $data->{detail}"
+            # By default, for user privacy, we send only the domain, replacing
+            # the local-part
+            my $pattern = Irssi::settings_get_bool('cleanlist_check_domain_only')
+                ? "test\@$domain" : $email;
+            
+            Irssi::print(
+                "Looking up $pattern against cleanlist with key "
+                . $cleanlist_api_key
             );
-            Irssi::print("Bitched about $email to '$report_channel'");
-        } else {
-            Irssi::print("$email looked alright");
+            my $response = $ua->get(
+                "http://app.cleanli.st/api/$cleanlist_api_key/pattern/check/"
+                . $pattern
+            );  
+            if (!$response->is_success) {
+                warn "Failed to look up test\@$email against cleanli.st - " 
+                    . $response->status_line;
+                return;
+            }
+            # Good response - code 1000, description valid, class 1
+            my $data = JSON::decode_json($response->content);
+            if ($data->{code} != 1000) {
+                $server->command(
+                    "MSG $report_channel $account email $email may be dodgy - "
+                    . "code $data->{code} - $data->{detail}"
+                );
+                Irssi::print("Bitched about $email to '$report_channel'");
+            } else {
+                Irssi::print("Cleanlist reported no problems for $email");
+            }
         }
     }
 }
