@@ -90,7 +90,7 @@ sub event_privmsg {
             if ($data->{code} != 1000) {
                 $server->command(
                     "MSG $report_channel $account email $email may be dodgy - "
-                    . "code $data->{code} - $data->{detail}"
+                    . "cleanli.st code $data->{code} - $data->{detail}"
                 );
                 Irssi::print("Bitched about $email to '$report_channel'");
             } else {
@@ -114,7 +114,7 @@ sub event_privmsg {
                 return;
             }
             my $data = JSON::decode_json($response->content);
-            if ($data->{request_status} ne 'success') {
+            if ($data->{request_status} eq 'success') {
                 if ($data->{domain_status} ne 'ok') {
                     $server->command(
                         "MSG $report_channel $account email $email may be dodgy"
