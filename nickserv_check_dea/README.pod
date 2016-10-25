@@ -1,9 +1,27 @@
-=head1 nickserv_check_cleanlist
+=head1 nickserv_check_dea
 
 A quick and dirty irssi script to watch for NickServ REGISTER mesages in an
-Atheme services "snoop" channel, and checks the email address against
-http://cleanli.st/ to see if it used a throw-away email address, and report hits
-to another channel.
+Atheme services "snoop" channel, and checks the email address against various
+"is this a disposable email address provider" to see if it used a throw-away
+email address, and report hits either to that channel or another one.
+
+It currently supports checking the following services:
+
+=over
+
+=item cleanli.st
+
+L<cleanli.st|http://www.cleanli.st/> - set your cleanli.st API key using
+C<< /set cleanlist_api_key ... >>
+
+=item bdea
+
+L<block-disposable-email.com|http://www.block-disposable-email.com> - set your
+BDEA API key using CC<< /set bdea_api_key ... >>.
+
+=back
+
+Only the service(s) for which an API key is configured will be checked.
 
 Obviously this would, in the longer term, be better implemented within Atheme
 so it could reject the registration, but we're trialling this to see how usable
@@ -20,7 +38,11 @@ Load it as you would any other Irssi script, then set:
 
 Provide your L<http://cleanli.st/> API key to be used
 
-=item * nickserv_check_cleanlist_channels
+=item * bdea_api_key
+
+Provide your L<http://block-disposable-email.com/> API key
+
+=item * nickserv_check_dea_channels
 
 A comma-separated list of channels on which we should watch for NickServ
 REGISTER messages. If you want to listen on one channel for the messages and
