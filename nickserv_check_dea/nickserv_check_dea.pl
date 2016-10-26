@@ -48,7 +48,7 @@ my $ua = LWP::UserAgent->new(
 
 sub event_privmsg {
     my ($server, $data, $nick, $address) = @_;
-    my ($target, $text) = split / :/, $data, 2;
+    my ($target, $text) = split / :/, Irssi::strip_codes($data), 2;
     
     my $channel_list = Irssi::settings_get_str(
         'nickserv_check_dea_channels'
@@ -64,6 +64,10 @@ sub event_privmsg {
 
     if (my($account, $email) = $text =~ /REGISTER: (\w+) to (\S+)/) {
         my $domain = (split /\@/, $email)[1];
+        Irssi::print(
+            sprintf "Recognised NickServ REGISTER for %s to %s (domain %s)",
+                $account, $email, $domain,
+        );
         my $cleanlist_api_key = Irssi::settings_get_str('cleanlist_api_key');
         if ($cleanlist_api_key) {
 
