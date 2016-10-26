@@ -36,7 +36,7 @@ Irssi::settings_add_str(
 # For cleanli.st, you can supply a whole email address to also check if the
 # local-part looks suspicious - but you might not want to send your user's full
 # email address to a third party, setting this to a true value will change the
-# local-part to testing@ before sending.
+# local-part to testlookup@ before sending.
 Irssi::settings_add_bool(
     'nickserv_check_dea', 'cleanlist_check_domain_only', 1
 );
@@ -74,7 +74,7 @@ sub event_privmsg {
             # By default, for user privacy, we send only the domain, replacing
             # the local-part
             my $pattern = Irssi::settings_get_bool('cleanlist_check_domain_only')
-                ? "test\@$domain" : $email;
+                ? "testlookup\@$domain" : $email;
             
             Irssi::print(
                 "Looking up $pattern against cleanlist with key "
