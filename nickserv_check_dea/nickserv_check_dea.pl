@@ -42,7 +42,8 @@ Irssi::settings_add_bool(
 );
 
 my $ua = LWP::UserAgent->new(
-    agent => "irssi/nickserv_check_dea $VERSION",
+    agent   => "irssi/nickserv_check_dea $VERSION",
+    timeout => 5,
 );
 
 
