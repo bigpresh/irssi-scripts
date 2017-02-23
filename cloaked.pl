@@ -87,9 +87,9 @@ sub cmd_cloaked {
             Irssi::print("Pass a nick to address the cloaked message to");
             return;
         }
-        $server->command("MSG $channel $user: $message. enjoy!");
+        $server->command("MSG $channel $user: $message. Enjoy!");
     } elsif ($witem->{type} eq 'QUERY') {
-        $server->command("MSG $witem->{name} $message, enjoy!");
+        $server->command("MSG $witem->{name} $message. Enjoy!");
     } else {
         warn "Called from unrecognised witem type " . $witem->{type};
     }
