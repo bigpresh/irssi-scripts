@@ -39,7 +39,7 @@ sub cmd_cloaked {
         # a bit more normal
         qw(
             turqouise   aquamarine  purple   red
-        ).
+        ),
         # lovely
         (
             'snot green', 'baby-poo yellow', 'lapis blue',
