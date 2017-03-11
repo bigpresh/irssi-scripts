@@ -50,7 +50,7 @@ sub cmd_cloaked {
         'badger hair', 'luxury wool', 'locks of orphans',
         'badger fur', 'weasel fur', 'meerkat fur', 'cat hair',
         'puppy fur', 'bison hair',
-        'belly-button fluff', 'public hair',
+        'belly-button fluff', 'pubic hair',
     );
     my @methods = (
         'hand made', 'crafted', 'woven', 'thrown together',
